@@ -1,6 +1,7 @@
 <html>
 <head>
   <title>Example minimum receiver</title>
+  <script src="//tomodo-tools.s3.amazonaws.com/tomodo.korz-0.5.js"></script>
   <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
     <style>
       body {
@@ -46,6 +47,7 @@
     <div id="ambience">
       <video id='media'/>
     </div>
+    <img id='image_media'/>
     <canvas id="scratch"></canvas>
   <script>
     window.onload = function() {
