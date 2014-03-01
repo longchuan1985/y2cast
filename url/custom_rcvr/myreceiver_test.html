@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<!DOCTYPE html>
 <html>
 <head>
     <title>Sample Media Receiver</title>
@@ -31,57 +30,51 @@ limitations under the License.
     <script type="text/javascript" src="//tomodo-tools.s3.amazonaws.com/tomodo.korz-0.5.js"></script>
 
     <style>
-        body {
-            overflow:hidden;
+      body {
+        background-size:100% 100%;
+        font-family: Verdana, Geneva, sans-serif;
+        color: #444;
+        line-height: 150%;
+        border: 0px;
+        margin: 0px;
+        width: 100%;
+        height: 100%;
+        overflow: hidden !important;
+      }
+      video {
+        width: 100%;
+        height: 100%;
+        margin: auto auto;
+        overflow: hidden !important;
+      }
+      #ambience {
+        transition-property: all;
+        transition-duration: 1s;
+        transition-timing-function: linear;
+        -moz-transition-property: all;
+        -moz-transition-duration: 1s;
+        -moz-transition-timing-function: linear;
+        -webkit-transition-property: all;
+        -webkit-transition-duration: 1s;
+        -webkit-transition-timing-function: linear;
+        -o-transition-property: all;
+        -o-transition-duration: 1s;
+        -o-transition-timing-function: linear;
+        outline: black solid 0px;
         }
-        video {
-            height:auto;
-            width:100%;
-            text-align: center;
-            border:0px solid silver;
-            display: table-cell;
-            vertical-align: middle;
-            color: #FFFFFF;
-            background-color: #000000;
-            font-weight: bold;
-            font-family: Verdana, Geneva, sans-serif;
-            font-size:40px;
-            float:left;
-            z-index: 1;
-            position:absolute;
-        }
-        #messages {
-            color: #FFFFFF;
-            float: left;
-            margin-left: 25px;
-            margin-top:  25px;
-            z-index: 2;
-            position:absolute;
-            font-weight: bold;
-            width:1000PX;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        #messages span {
-            font-weight: normal;
-        }
+      canvas {
+        width:100%;
+        height:100%;
+        display: none;
+      }
     </style>
 </head>
-<body>
-    <div id="messages">
-        <div id="title">Sample Media Receiver HUD</div>
-        <div>Application State: <span id="applicationState">-</span></div>
-        <div>Session Count: <span id="sessionCount">0</span></div>
-        <div>Media Element State: <span  id="mediaElementState">-</span></div>
-        <div>Cast Receiver Manager Message: <span  id="castReceiverManagerMessage">-</span></div>
-        <div>Media Manager Message: <span  id="mediaManagerMessage">-</span></div>
-        <div>Message Bus Message: <span  id="messageBusMessage">-</span></div>
-        <div>Volume: <span  id="volumeMessage">Unknown</span></div>
-        <div>Host State: <span id="mediaHostState">Unknown</span></div>
-        <div>Media Type: <span id="mediaType">Unkown</span></div>
-        <div>Media Protocol: <span id="mediaProtocol">Unknown</span></div>
+<body background="images/home_lavender.jpg">
+    <div id="ambience">
+      <video id='receiverVideoElement'>
+      </video>
     </div>
-    <video id="receiverVideoElement"></video>
+    <canvas id="scratch"></canvas>
 
     <script type="text/javascript">
         "use strict";
@@ -96,10 +89,11 @@ limitations under the License.
         window.connectedCastSenders = []; // {senderId:'', channel:obj}
 
         function setHudMessage(elementId, message) {
-            document.getElementById(elementId).innerHTML = '' + JSON.stringify(message);
+            //document.getElementById(elementId).innerHTML = '' + JSON.stringify(message);
         }
 
         window.onload = function() {
+            initCanvas();
             window.mediaElement = document.getElementById('receiverVideoElement');
             window.mediaElement.autoplay = true;
 
@@ -349,6 +343,7 @@ limitations under the License.
                 console.log("### Media Manager - ENDED: " + JSON.stringify(event));
                 setHudMessage('mediaManagerMessage', 'ENDED');
 
+                ambience.style.backgroundColor = 'rgba(255, 255, 255, 0)';
                 window.mediaManager['onEndedOrig']();
             }
 
@@ -431,6 +426,7 @@ limitations under the License.
                 console.log("### Media Manager - LOADED METADATA: " + JSON.stringify(event));
                 setHudMessage('mediaManagerMessage', 'LOADED METADATA: ' + JSON.stringify(event));
 
+                ambience.style.backgroundColor = 'rgba(255, 255, 255, 255)';
                 window.mediaManager['onLoadMetadataOrig'](event);
             }
 
@@ -641,6 +637,54 @@ limitations under the License.
              */
             window.castReceiverManager.start(appConfig);
         }
+    var sctxt, video, ambience;
+    function initCanvas() {
+      ambience = document.getElementById("ambience");
+      video = document.getElementsByTagName("video")[0];
+      scratch = document.getElementById("scratch");
+      sctxt = scratch.getContext("2d");
+      video.addEventListener("play", paintAmbience, false);
+      video.addEventListener("loadedmetadata", paintAmbience, false);
+    }
+
+    function paintAmbience() {
+      if (video.loadedmetadata) {
+        ambience.style.backgroundColor = 'rgba(255, 255, 255, 255)';
+        return;
+      }
+      if (video.ended) {
+        ambience.style.backgroundColor = 'rgba(255, 255, 255, 0)';
+        return;
+      }
+      // set up scratch frame
+      sctxt.drawImage(video, 0, 0, 320, 160);
+      frame = sctxt.getImageData(0, 0, 320, 160);
+      // get average color for frame and transition to it
+      color = getColorAvg(frame);
+      ambience.style.backgroundColor = 'rgb('+color[0]+','+color[1]+','+color[2]+')';
+      if (video.paused) {
+        return;
+      }
+      // don't do it more often than once a second
+      setTimeout(function () {
+          paintAmbience();
+      }, 1000);
+    }
+    function getColorAvg(frame) {
+      r = 0;
+      g = 0;
+      b = 0;
+      // calculate average color from image in canvas
+      for (var i = 0; i < frame.data.length; i += 4) {
+        r += frame.data[i];
+        g += frame.data[i + 1];
+        b += frame.data[i + 2];
+      }
+      r = Math.ceil(r / (frame.data.length / 4));
+      g = Math.ceil(g / (frame.data.length / 4));
+      b = Math.ceil(b / (frame.data.length / 4));
+      return Array(r, g, b);
+    }
     </script>
 </body>
 </html>
