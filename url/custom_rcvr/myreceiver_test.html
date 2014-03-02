@@ -111,7 +111,7 @@
                 setHudMessage('mediaElementState','Can Play');
             });
             window.mediaElement.addEventListener('ended', function(e){
-                document.getElementsByTagName("video")[0].style.backgroundColor="rgba(0,0,0,0)";
+                document.getElementsByTagName("video")[0].style.backgroundColor="rgba(0,0,0,0.5)";
                 console.log("######### MEDIA ELEMENT ENDED");
                 setHudMessage('mediaElementState','Ended');
             });
