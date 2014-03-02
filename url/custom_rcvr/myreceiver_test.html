@@ -4,15 +4,15 @@
     <!--
         Cast APIs
     -->
-    <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+    <script type="text/javascript" src="//y2cast.googlecode.com/git/url/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
     <!--
         Cast Media Library
     -->
-    <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/mediaplayer/0.3.0/media_player.js"></script>
+    <script type="text/javascript" src="//y2cast.googlecode.com/git/url/cast/sdk/libs/mediaplayer/0.3.0/media_player.js"></script>
     <!--
         CORS for HLS
     -->
-    <script type="text/javascript" src="//tomodo-tools.s3.amazonaws.com/tomodo.korz-0.5.js"></script>
+    <script type="text/javascript" src="//y2cast.googlecode.com/git/url/tomodo-tools/tomodo.korz-0.5.js"></script>
 
     <style>
       body {
@@ -102,6 +102,7 @@
                 setHudMessage('mediaElementState','Load Start');
             });
             window.mediaElement.addEventListener('loadeddata', function(e){
+                document.getElementsByTagName("video")[0].style.backgroundColor="rgba(0,0,0,1)";
                 console.log("######### MEDIA ELEMENT DATA LOADED");
                 setHudMessage('mediaElementState','Data Loaded');
             });
@@ -110,10 +111,12 @@
                 setHudMessage('mediaElementState','Can Play');
             });
             window.mediaElement.addEventListener('ended', function(e){
+                document.getElementsByTagName("video")[0].style.backgroundColor="rgba(0,0,0,0)";
                 console.log("######### MEDIA ELEMENT ENDED");
                 setHudMessage('mediaElementState','Ended');
             });
             window.mediaElement.addEventListener('playing', function(e){
+                document.getElementsByTagName("video")[0].style.backgroundColor="rgba(0,0,0,1)";
                 console.log("######### MEDIA ELEMENT PLAYING");
                 setHudMessage('mediaElementState','Playing');
             });
@@ -327,7 +330,6 @@
                 console.log("### Media Manager - ENDED: " + JSON.stringify(event));
                 setHudMessage('mediaManagerMessage', 'ENDED');
 
-                ambience.style.backgroundColor = 'rgba(255, 255, 255, 0)';
                 window.mediaManager['onEndedOrig']();
             }
 
@@ -410,7 +412,6 @@
                 console.log("### Media Manager - LOADED METADATA: " + JSON.stringify(event));
                 setHudMessage('mediaManagerMessage', 'LOADED METADATA: ' + JSON.stringify(event));
 
-                ambience.style.backgroundColor = 'rgba(255, 255, 255, 255)';
                 window.mediaManager['onLoadMetadataOrig'](event);
             }
 
